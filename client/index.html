@@ -1,0 +1,399 @@
+<div id="signDiv">
+  Username: <input id="signDiv-username" type="text"></input><br>
+  Password: <input id="signDiv-password" type="password"></input><br>
+  <button id="signDiv-signIn">Sign In</button>
+  <button id="signDiv-signUp">Sign Up</button>
+</div>
+<div id="gameDiv" style="display: none;">
+  <div id="game" style="position: absolute;width:500px;height:500px;">
+    <canvas id="ctx" width="500" height="500" style="position:absolute;border: 1px solid #000000;"></canvas>
+    <canvas id="ctx-ui" width="500" height="500" style="position:absolute;border: 1px solid #000000;"></canvas>
+    <div id="ui" style="position:absolute;width:500px;height:500px">
+      <!--<button onclick="changeMap()" style="position:absolute;bottom:0px;left:0px;">
+        Change Map
+      </button>-->
+    </div>
+  </div>
+  <div id="belowGame" style="margin-top:520px">
+    <div id="chat-text" style="width: 500px; height: 100px; overflow-y: scroll;">
+    </div>
+    <div id="inventory"></div>
+    <form id="chat-form">
+      <input id="chat-input" type="text" style="width:500px"></input>
+    </form>
+  </div>
+  <div id="rightGame" style="background-color: red; position: absolute; top: 10px; left: 520px; height: 500px; width: 200px;">
+    <div class="container">
+      <h2 id="scoreDiv" style="text-align: center;"></h2>
+    </div>
+  </div>
+</div>
+<script src="/client/socket-io.js"></script>
+<script src="/client/Inventory.js"></script>
+<script>
+  var WIDTH = 500;
+  var HEIGHT = 500;
+  var TILE_SIZE = 32;
+  var socket = io();
+
+  //signin
+  var signDiv = document.getElementById("signDiv");
+  var signDivUsername = document.getElementById("signDiv-username");
+  var signDivSignIn = document.getElementById("signDiv-signIn");
+  var signDivSignUp = document.getElementById("signDiv-signUp");
+  var signDivPassword = document.getElementById("signDiv-password");
+  signDivSignIn.onclick = function(){
+    socket.emit('signIn', {username: signDivUsername.value, password: signDivPassword.value})
+  }
+  signDivSignUp.onclick = function(){
+    socket.emit('signUp', {username: signDivUsername.value, password: signDivPassword.value})
+  }
+  var scoreDiv = document.getElementById("scoreDiv");
+  socket.on("signInResponse", function(data){
+    if (data.success) {
+      signDiv.style.display = "none";
+      gameDiv.style.display = "inline-block";
+    } else {
+      alert("Sign in unsuccessful.");
+    }
+  });
+  socket.on("signUpResponse", function(data){
+    if (data.success) {
+      alert("Sign Up Successful.");
+    } else {
+      alert("Sign Up Unsuccessful.");
+    }
+  });
+
+var array = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 13, 14, 12, 13, 14, 12, 13, 14, 7, 0, 0, 0, 0, 0, 0, 0, 12, 13, 14, 12, 13, 14, 12, 13, 14, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 13, 14, 12, 13, 14, 12, 13, 14, 7, 0, 0, 0, 0, 0, 0, 0, 12, 13, 14, 12, 13, 14, 12, 13, 14, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 13, 14, 12, 13, 14, 12, 13, 14, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 13, 14, 12, 13, 14, 12, 13, 14, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 33, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 33, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 33, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 33, 33, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 33, 33, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 33, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 13, 14, 12, 13, 14, 12, 13, 14, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 13, 14, 12, 13, 14, 12, 13, 14, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 78, 79, 79, 79, 79, 79, 79, 79, 79, 79, 79, 79, 79, 80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 88, 89, 89, 89, 89, 89, 89, 89, 89, 89, 89, 89, 89, 90, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 78, 79, 79, 89, 89, 89, 89, 89, 89, 89, 89, 89, 89, 89, 89, 89, 89, 79, 79, 80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 88, 89, 89, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 89, 89, 90, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 98, 99, 99, 89, 89, 89, 89, 89, 89, 89, 89, 89, 89, 89, 89, 89, 89, 99, 99, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 88, 89, 89, 89, 89, 89, 89, 89, 89, 89, 89, 89, 89, 90, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 98, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 13, 14, 12, 13, 14, 12, 13, 14, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 13, 14, 12, 13, 14, 12, 13, 14, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+  var array2D = [];
+  for(var i = 0 ; i < 50; i++){
+  	array2D[i] = [];
+  	for(var j = 0 ; j < 50; j++){
+  		array2D[i][j] = array[i * 50 + j];
+  	}
+  }
+  //game
+  var Img = {};
+  Img.player = new Image();
+  Img.player.src = "/client/img/player.png";
+  Img.bullet = new Image();
+  Img.bullet.src = "/client/img/bullet_pistol.png";
+  Img.map = {};
+  Img.map['default'] = {};
+  Img.map['default'].image = new Image();
+  Img.map['default'].image.src = "/client/img/mapp.png";
+  Img.map['default'].grid = array2D;
+  Img.map['default'].isPositionWall = function(pt) {
+    var gridX = Math.floor(pt.x / TILE_SIZE);
+    var gridY = Math.floor(pt.y / TILE_SIZE);
+    if (gridX < 0 || gridX >= Img.map['default'].grid[0].length) {
+      return true;
+    }
+    if (gridY < 0 || gridY >= Img.map['default'].grid.length) {
+      return true;
+    }
+    return Img.map['default'].grid[gridY][gridX];
+  };
+  Img.map['ocean'] = new Image();
+  Img.map['ocean'].src = "/client/img/ocean.png";
+
+  var chatText = document.getElementById("chat-text");
+  var chatInput = document.getElementById("chat-input");
+  var chatForm = document.getElementById("chat-form");
+  var ctx = document.getElementById("ctx").getContext("2d");
+  ctx.font = "30px Arial";
+  var ctxui = document.getElementById("ctx-ui").getContext("2d");
+  ctxui.font = "30px Arial";
+
+  var Player = function(initPack) {
+    var self = {};
+    self.id = initPack.id;
+    self.number = initPack.number;
+    self.x = initPack.x;
+    self.y = initPack.y;
+    self.hp = initPack.hp;
+    self.hpMax = initPack.hpMax;
+    self.score = initPack.score;
+    self.map = initPack.map;
+    self.angle = initPack.angle;
+    self.mouseAngle = initPack.angle;
+    self.spriteAnimCounter = 0;
+    self.pressingRight = initPack.pressingRight;
+    self.pressingLeft = initPack.pressingLeft;
+    self.pressingUp = initPack.pressingUp;
+    self.pressingDown = initPack.pressingDown;
+    self.draw = function(){
+      if(Player.list[selfId].map !== self.map) {
+        return;
+      }
+      var leftBumper = {x: self.x - 40, y: self.y};
+      var rightBumper = {x: self.x + 40, y: self.y};
+      var upBumper = {x: self.x, y: self.y - 40};
+      var downBumper = {x: self.x, y: self.y + 40};
+      if (Img.map[self.map].isPositionWall(rightBumper)) {
+        socket.emit("collide", {side: "right", id: self.id});
+      }
+      if (Img.map[self.map].isPositionWall(leftBumper)) {
+        socket.emit("collide", {side: "left", id: self.id});
+      }
+      if (Img.map[self.map].isPositionWall(upBumper)) {
+        socket.emit("collide", {side: "up", id: self.id});
+      }
+      if (Img.map[self.map].isPositionWall(downBumper)) {
+        socket.emit("collide", {side: "down", id: self.id});
+      }
+      var x = self.x - Player.list[selfId].x + WIDTH/2 - Img.player.width/3;
+      var y = self.y - Player.list[selfId].y + HEIGHT/2 - Img.player.height/4;
+      var hpWidth = 30 * self.hp/self.hpMax;
+      ctx.fillStyle = "red";
+      ctx.fillRect(x+hpWidth/2-2, y-17, hpWidth, 4);
+      var width = Img.player.width;
+      var height = Img.player.height;
+      var frameWidth = Math.floor(width/3);
+      var frameHeight = Math.floor(height/4);
+      var angle = self.angle;
+      var direction;
+      if (self.pressingRight || self.pressingLeft || self.pressingUp || self.pressingDown) {
+        self.spriteAnimCounter += 0.2;
+      }
+      var animMod = Math.floor(self.spriteAnimCounter % 3);
+      var mouseAngle = self.mouseAngle;
+      console.log(mouseAngle);
+      if (mouseAngle < 0) {
+        mouseAngle = 360 + mouseAngle;
+      }
+      if (mouseAngle >= 45 && mouseAngle < 135) {
+        direction = 2; //down
+      } else if (mouseAngle >= 135 && mouseAngle < 225) {
+        direction = 1; //left
+      } else if (mouseAngle >= 225 && mouseAngle < 315) {
+        direction = 0; //up
+      } else {
+        direction = 3; //right
+      }
+      ctx.drawImage(Img.player,animMod*frameWidth,direction*frameHeight,frameWidth,frameHeight,x-frameWidth/2,y-frameHeight/2, 75, 75);
+      //ctx.fillText(self.score, self.x, self.y-60);
+    }
+    Player.list[self.id] = self;
+    return self;
+  }
+  Player.list = {};
+
+  var Bullet = function(initPack) {
+    var self = {};
+    self.id = initPack.id;
+    self.x = initPack.x;
+    self.y = initPack.y;
+    self.map = initPack.map;
+    self.angle = initPack.angle;
+    self.draw = function(){
+      if (Player.list[selfId].map != self.map){
+        return;
+      }
+      var width = Img.bullet.width/2;
+      var height = Img.bullet.height/2;
+      var x = self.x - Player.list[selfId].x + WIDTH/2;
+      var y = self.y - Player.list[selfId].y + HEIGHT/2;
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(self.angle*Math.PI/180+(90*Math.PI/180));
+      ctx.drawImage(Img.bullet,-(Img.bullet.width/2),-(Img.bullet.height/2),width,height);
+      ctx.restore();
+    }
+    Bullet.list[self.id] = self;
+    return self;
+  }
+  Bullet.list = {};
+
+  var selfId = null;
+  socket.on("init", function(data){
+    if(data.selfId) {
+      selfId = data.selfId;
+    }
+    for (i = 0; i < data.player.length; i++) {
+      new Player(data.player[i]);
+    }
+    for (i = 0; i < data.bullet.length; i++) {
+      new Bullet(data.bullet[i]);
+    }
+  });
+
+  socket.on("update", function(data){
+    for (i = 0; i < data.player.length; i++) {
+      var pack = data.player[i];
+      var p = Player.list[pack.id];
+      if (p) {
+        if (pack.x !== undefined) {
+          var oldX = p.x;
+          p.x = pack.x;
+          if (Img.map[p.map].isPositionWall(p)) {
+            p.x = oldX;
+            socket.emit("xUp", {objType: "p", id: p.id, x: p.x});
+          }
+        }
+        if (pack.y !== undefined) {
+          var oldY = p.y;
+          p.y = pack.y;
+          if (Img.map[p.map].isPositionWall(p)) {
+            p.y = oldY;
+            socket.emit("yUp", {objType: "p", id: p.id, y: p.y});
+          }
+        }
+        if (pack.hp !== undefined) {
+          p.hp = pack.hp;
+        }
+        if (pack.score !== undefined) {
+          p.score = pack.score;
+        }
+        if (pack.map !== undefined) {
+          p.map = pack.map;
+        }
+        if (pack.angle !== undefined) {
+          p.angle = pack.angle;
+        }
+        if (pack.mouseAngle !== undefined) {
+          p.mouseAngle = pack.mouseAngle;
+        }
+        if (pack.pressingRight !== undefined) {
+          p.pressingRight = pack.pressingRight;
+        }
+        if (pack.pressingLeft !== undefined) {
+          p.pressingLeft = pack.pressingLeft;
+        }
+        if (pack.pressingUp !== undefined) {
+          p.pressingUp = pack.pressingUp;
+        }
+        if (pack.pressingDown !== undefined) {
+          p.pressingDown = pack.pressingDown;
+        }
+      }
+    }
+    for (i = 0; i < data.bullet.length; i++) {
+      var pack = data.bullet[i];
+      var b = Bullet.list[data.bullet[i].id];
+      if (b) {
+        if (pack.x !== undefined) {
+          var oldX = b.x;
+          b.x = pack.x;
+          if (Img.map[b.map].isPositionWall(b)) {
+            b.x = oldX;
+            socket.emit("xUp", {objType: "b", id: b.id, x: b.x});
+          }
+        }
+        if (pack.y !== undefined) {
+          var oldY = b.y;
+          b.y = pack.y;
+          if (Img.map[b.map].isPositionWall(b)) {
+            b.y = oldY;
+            socket.emit("yUp", {objType: "b", id: b.id, y: b.y});
+          }
+        }
+      }
+    }
+  });
+
+  socket.on("remove", function(data){
+    for (i = 0; i < data.player.length; i++) {
+      delete Player.list[data.player[i]];
+    }
+    for (i = 0; i < data.bullet.length; i++) {
+      delete Bullet.list[data.bullet[i]];
+    }
+  });
+
+  setInterval(function(){
+    if(!selfId) {
+      return;
+    }
+    ctx.clearRect(0, 0, 500, 500);
+    drawMap();
+    drawScore();
+    for (i in Player.list) {
+      Player.list[i].draw();
+    }
+    for (i in Bullet.list) {
+      Bullet.list[i].draw();
+    }
+  }, 1000/25);
+  var drawMap = function(){
+    var player = Player.list[selfId];
+    var x = WIDTH/2 - player.x;
+    var y = HEIGHT/2 - player.y;
+    ctx.drawImage(Img.map[player.map].image, 0, 0, Img.map[player.map].image.width, Img.map[player.map].image.height, x, y, Img.map[player.map].image.width*2, Img.map[player.map].image.height*2);
+  }
+  var drawScore = function(){
+    scoreDiv.innerHTML = "Score: " + Player.list[selfId].score;
+  }
+
+  socket.on('addToChat', function(data){
+    chatText.innerHTML += "<div>" + data + "</div";
+  });
+  socket.on("evalAnswer", function(data){
+    console.log(data);
+  })
+
+  chatForm.onsubmit = function(e){
+    e.preventDefault();
+    if (chatInput.value[0] === "/") {
+      socket.emit("evalServer", chatInput.value.slice(1));
+    } else if (chatInput.value[0] === "@") {
+      socket.emit("sendPmToServer",{
+        username:chatInput.value.slice(1, chatInput.value.indexOf(",")),
+        message:chatInput.value.slice(chatInput.value.indexOf(",")+1),
+      });
+    } else {
+      socket.emit("sendMsgToServer", chatInput.value);
+      chatInput.value = "";
+    }
+  }
+
+  //UI
+  var changeMap = function() {
+    socket.emit("changeMap");
+  }
+
+  var inventory = new Inventory(socket, false);
+  socket.on("updateInventory", function(items){
+    inventory.items = items;
+    inventory.refreshRender();
+  })
+
+  document.onkeydown = function(event){
+    if (event.keyCode === 68) { //D
+      socket.emit('keyPress', {inputId: 'right', state: true})
+    } else if (event.keyCode == 83) { // S
+      socket.emit('keyPress', {inputId: 'down', state: true})
+    } else if (event.keyCode == 65) { // A
+      socket.emit('keyPress', {inputId: 'left', state: true})
+    } else if (event.keyCode == 87) { // W
+      socket.emit('keyPress', {inputId: 'up', state: true})
+    }
+  }
+  document.onkeyup = function(event){
+    if (event.keyCode === 68) { //D
+      socket.emit('keyPress', {inputId: 'right', state: false})
+    } else if (event.keyCode == 83) { // S
+      socket.emit('keyPress', {inputId: 'down', state: false})
+    } else if (event.keyCode == 65) { // A
+      socket.emit('keyPress', {inputId: 'left', state: false})
+    } else if (event.keyCode == 87) { // W
+      socket.emit('keyPress', {inputId: 'up', state: false})
+    }
+  }
+  document.onmousedown = function(event) {
+    socket.emit("keyPress", {inputId: "attack", state: true});
+  }
+  document.onmouseup = function(event) {
+    socket.emit("keyPress", {inputId: "attack", state: false});
+  }
+  document.onmousemove = function(event) {
+    socket.emit("keyPress", {inputId: "mouseAngle", x: event.clientX, y: event.clientY});
+    var angle = Math.atan2(event.clientY, event.clientX) * 180/Math.PI;
+    if (Math.random() < 0.11) {
+    }
+  }
+  document.oncontextmenu = function(event) {
+    event.preventDefault();
+  }
+</script>
