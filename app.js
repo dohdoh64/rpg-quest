@@ -117,8 +117,8 @@ setInterval(function(){
   }
 
 }, 1000/25);
-var server_ip = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1';
-var server_port = process.env.OPENSHIFT_NODEJS_PORT || 8000;
+var server_ip = process.env.IP   || process.env.OPENSHIFT_NODEJS_IP || '0.0.0.0';
+var server_port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080;
 
 serv.listen(server_port, server_ip, function(){
   console.log("server started on " + server_ip + ":" + server_port);
