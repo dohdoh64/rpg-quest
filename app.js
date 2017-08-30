@@ -1,3 +1,4 @@
+'use strict'
 //var mongojs = require("mongojs");
 var db = null;//mongojs("localhost:27017/myGame", ["account", 'progress']);
 var express = require('express');
